@@ -107,15 +107,41 @@ st.markdown(f"""
     
     html, body, [class*="css"] {{
         font-family: 'Noto+Sans+KR', sans-serif;
+        margin: 0 !important;
+        padding: 0 !important;
     }}
     
     .main {{
         background-color: transparent;
     }}
 
-    /* Reduce top padding of the main container */
+    /* Remove all top margins and padding - More aggressive */
     [data-testid="stAppViewContainer"] > section:nth-child(2) > div:nth-child(1) {{
-        padding-top: 0rem !important;
+        padding-top: 0 !important;
+        margin-top: -100px !important; /* Force pull up if needed */
+    }}
+
+    .stAppViewBlockContainer, .block-container {{
+        padding-top: 0 !important;
+        margin-top: -50px !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }}
+
+    /* Target the very first element inside the main container */
+    [data-testid="stVerticalBlock"] > div:first-child {{
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }}
+
+    header[data-testid="stHeader"], [data-testid="stDecoration"] {{
+        display: none !important;
+        height: 0 !important;
+    }}
+
+    /* Remove whitespace from top elements */
+    #tabs-b-title {{
+        display: none !important;
     }}
 
     /* Navigation Header */
@@ -175,19 +201,19 @@ st.markdown(f"""
         align-items: center;
     }}
 
-    /* Table-like Navigation UI */
+    /* Table-like Navigation UI - Borders Removed */
     #nav-anchor-home + div [data-testid="stHorizontalBlock"],
     #nav-anchor-other + div [data-testid="stHorizontalBlock"] {{
-        background-color: #FBC02D; /* Border color as background */
+        background-color: transparent !important;
         padding: 0 !important;
-        gap: 3px !important; /* This creates the 'grid' lines */
-        border: 3px solid #FBC02D;
-        border-radius: 12px;
+        gap: 0 !important; /* Removed gap (grid lines) */
+        border: none !important; /* Removed outer border */
+        border-radius: 0;
         overflow: hidden;
-        margin: -100px -10% 20px -10% !important;
+        margin: -40px -10% 10px -10% !important;
         display: flex !important;
         align-items: stretch !important;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        box-shadow: none !important; /* Removed shadow for a cleaner look if borders are gone */
     }}
 
     /* Table Cell Style for Columns */
@@ -205,7 +231,7 @@ st.markdown(f"""
     #nav-anchor-home + div [data-testid="column"]:first-child,
     #nav-anchor-other + div [data-testid="column"]:first-child {{
         background-color: white !important;
-        min-width: 300px;
+        min-width: 450px;
     }}
 
     /* Button Cell specific */
@@ -222,8 +248,8 @@ st.markdown(f"""
         margin: 0 !important;
         width: 100% !important;
         height: 100% !important;
-        min-height: 90px !important; /* 칸 크기 확대 */
-        font-size: 26px !important; /* 키워진 글씨 크기 */
+        min-height: 135px !important; /* 1.5배 크기 확대 */
+        font-size: 39px !important; /* 1.5배 글씨 크기 확대 */
         font-weight: 800 !important;
         background-color: #DCEDC8 !important;
         color: black !important;
@@ -247,9 +273,9 @@ st.markdown(f"""
     }}
     
     /* Hide Streamlit elements */
-    #MainMenu {{visibility: hidden;}}
-    header {{visibility: hidden;}}
-    footer {{visibility: hidden;}}
+    #MainMenu {{display: none !important;}}
+    header {{display: none !important;}}
+    footer {{display: none !important;}}
     
     /* Scroll Spacer */
     .spacer {{ height: 10px; }}
@@ -319,19 +345,6 @@ def create_pie_svg(pb, cd, as_val, size=50):
     """
     return svg
 
-# --- THEME SELECTION ---
-t_col1, t_col2 = st.columns([8, 2])
-with t_col2:
-    selected_theme = st.selectbox(
-        "🎨 테마 선택",
-        options=["기본", "자연", "하늘", "미세먼지"],
-        index=["기본", "자연", "하늘", "미세먼지"].index(st.session_state['theme']),
-        label_visibility="collapsed"
-    )
-    if selected_theme != st.session_state['theme']:
-        st.session_state['theme'] = selected_theme
-        st.rerun()
-
 # --- NAVIGATION HEADER ---
 if st.session_state['page'] == 'Home':
     st.markdown('<div id="nav-anchor-home"></div>', unsafe_allow_html=True)
@@ -346,7 +359,7 @@ with header_cols[0]:
         st.markdown(f'''
             <div style="display: flex; align-items: center; height: 100%; justify-content: flex-start;">
                 <a href="/" target="_self">
-                    <img src="data:image/png;base64,{logo_base64}" width="1000" style="max-width: 100%;">
+                    <img src="data:image/png;base64,{logo_base64}" width="1500" style="max-width: 100%;">
                 </a>
             </div>
             ''', unsafe_allow_html=True)
@@ -357,6 +370,19 @@ if header_cols[1].button("데이터 분석"): st.session_state['page'] = 'Analys
 if header_cols[2].button("중금속 정보"): st.session_state['page'] = 'Info'
 if header_cols[3].button("출처/팀"): st.session_state['page'] = 'Etc'
 if header_cols[4].button("Q&A"): st.session_state['page'] = 'QnA'
+
+# --- THEME SELECTION (Moved below Menu) ---
+t_col1, t_col2 = st.columns([8, 2])
+with t_col2:
+    selected_theme = st.selectbox(
+        "🎨 테마 선택",
+        options=["기본", "자연", "하늘", "미세먼지"],
+        index=["기본", "자연", "하늘", "미세먼지"].index(st.session_state['theme']),
+        label_visibility="collapsed"
+    )
+    if selected_theme != st.session_state['theme']:
+        st.session_state['theme'] = selected_theme
+        st.rerun()
 
 # --- PAGE ROUTING ---
 
